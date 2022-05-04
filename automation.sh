@@ -33,3 +33,25 @@ sudo apt install awscli
 aws s3 \
 cp /tmp/${myname}-httpd-logs-${timestamp}.tar \
 s3://${s3_bucket}/${myname}-httpd-logs-${timestamp}.tar
+
+
+cd  /var/www/html/
+if [[ ! -f inventory.html ]]
+then
+   sudo touch inventory.html
+fi
+
+echo -en "Log Type\t\t\t Date Created\t\t\t Type\t\t\t Size<br>" >> /var/www/html/inventory.html
+logsize=$(du -h /tmp/${myname}-httpd-logs-${timestamp}.tar | awk '{print $1}')
+echo -en "apache2-logs\t\t ${timestamp}\t\t tar\t\t ${logsize}\t\t<br>" >> /var/www/html/inventory.html
+
+
+
+CRON_FILE="/etc/cron.d/automation"
+
+if [ ! -f $CRON_FILE ]; then
+	echo "cron file for automation does not exist, creating.."
+	sudo touch $CRON_FILE
+	/usr/bin/crontab $CRON_FILE
+	/bin/echo "@daily /Automation_Project/automation.sh" >> sudo $CRON_FILE
+fi
